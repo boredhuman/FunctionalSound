@@ -69,6 +69,8 @@ class AddSegment extends Segment {
       }
       parent!.addQueue.add(InputSegment(index));
       parent!.addQueue.add(this);
+
+      return true;
     }
     return false;
   }

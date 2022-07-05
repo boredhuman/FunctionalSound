@@ -1,3 +1,4 @@
+import 'dart:html';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:web_audio';
@@ -6,16 +7,14 @@ import 'package:math_expressions/math_expressions.dart';
 
 class AudioManager {
   AudioContext audioContext;
-  AudioManager() : audioContext = AudioContext();
+  late AudioBuffer audioBuffer;
+  AudioManager() : audioContext = AudioContext() {
+    audioBuffer = audioContext.createBuffer(1, 44100, 44100);
+  }
+  int sampleOffset = 0;
+  late double Function(double time) sampleProvider;
 
   void playSound(String expression) {
-    int time = 5;
-    int samplesPerSecond = 44100;
-    int bufferSize = time * samplesPerSecond;
-    AudioBuffer buffer = audioContext.createBuffer(1, bufferSize, samplesPerSecond);
-
-    Float32List channelBuffer = buffer.getChannelData(0);
-
     Parser p = Parser();
     Expression exp = p.parse(expression);
 
@@ -25,22 +24,52 @@ class AudioManager {
     Variable piVariable = Variable("pi");
     contextModel.bindVariable(piVariable, Number(pi));
 
-    for (int i = 0; i < bufferSize; i++) {
-      var time = i / samplesPerSecond;
+    sampleProvider = (time) {
       contextModel.bindVariable(timeVariable, Number(time));
 
       dynamic amplitude = exp.evaluate(EvaluationType.REAL, contextModel);
 
-      channelBuffer[i] = amplitude;
-    }
+      return amplitude;
+    };
 
     AudioBufferSourceNode audioBufferSourceNode = audioContext.createBufferSource();
 
-    audioBufferSourceNode.buffer = buffer;
+    audioBufferSourceNode.buffer = audioBuffer;
 
     audioBufferSourceNode.connectNode(audioContext.destination!);
 
+    writeBuffer(44100, 44100);
+
     audioBufferSourceNode.start();
-    print("Playing sound");
+
+    audioBufferSourceNode.onEnded.listen((event) {
+      onEnd(event);
+    });
+  }
+
+  void writeBuffer(int samplesPerSecond, int bufferSize) {
+    Float32List buffer = audioBuffer.getChannelData(0);
+    for (int i = 0; i < bufferSize; i++) {
+      double time = (sampleOffset + i) / samplesPerSecond;
+      double amp = sampleProvider(time);
+      buffer[i] = amp;
+    }
+    sampleOffset += bufferSize;
+  }
+
+  void onEnd(Event event) {
+    AudioBufferSourceNode audioBufferSourceNode = audioContext.createBufferSource();
+
+    audioBufferSourceNode.buffer = audioBuffer;
+
+    audioBufferSourceNode.connectNode(audioContext.destination!);
+
+    writeBuffer(44100, 44100);
+
+    audioBufferSourceNode.start();
+
+    audioBufferSourceNode.onEnded.listen((event) {
+      onEnd(event);
+    });
   }
 }

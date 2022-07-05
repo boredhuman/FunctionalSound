@@ -29,6 +29,20 @@ class Node {
     return xPos > x && yPos > y + height - 7 && xPos < x + width && yPos < y + height;
   }
 
+  bool isOverNode() {
+    int xPos = uiManager.lastMouseX;
+    int yPos = uiManager.getMouseY();
+    bool overNode = xPos > x && yPos > y && xPos < x + width && yPos < y + height;
+
+    // for (Segment segment in segments) {
+    //   if (segment.isOver()) {
+    //     overNode = true;
+    //     break;
+    //   }
+    // }
+    return overNode;
+  }
+
   void render(int mouseX, int mouseY) {
     if (dragging) {
       int xDelta = lastMouseX - mouseX;
@@ -139,12 +153,14 @@ class Node {
     return inRadius(x + width, y + height ~/ 2, 10);
   }
 
-  void handleMouseDown(MouseEvent event) {
+  bool handleMouseDown(MouseEvent event) {
     if (inHeader()) {
       dragging = true;
       lastMouseX = uiManager.lastMouseX;
       lastMouseY = uiManager.getMouseY();
+      return true;
     }
+    return false;
   }
 
   void handleMouseUp(MouseEvent event) {

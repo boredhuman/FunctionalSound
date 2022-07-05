@@ -44,4 +44,8 @@ class FontRenderer {
     }
     return totalWidth;
   }
+
+  int getLetterWidth(int letter) {
+    return fontTexture.textMetricsList[letter].width!.toInt() + 1;
+  }
 }

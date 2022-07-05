@@ -30,12 +30,23 @@ class TimeSegment extends Segment {
   void renderPauseButton() {
     int height = 30;
     int yOffset = 5;
-    int xOffset = width ~/ 2 - 12;
+    int wid = 10;
+    int gap = 2;
+    int xOffset = width ~/ 2 - (wid + gap);
 
-    drawQuad(x + xOffset, y + height + yOffset, x + 10 + xOffset, y + yOffset, 0xFFFFFFFF);
+    drawQuad(x + xOffset, y + height + yOffset, x + wid + xOffset, y + yOffset, overButton() ? 0xFF0000FF : 0xFFFFFFFF);
 
-    xOffset = width ~/ 2 + 2;
-    drawQuad(x + xOffset, y + height + yOffset, x + 10 + xOffset, y + yOffset, 0xFFFFFFFF);
+    xOffset += wid + gap * 2;
+    drawQuad(x + xOffset, y + height + yOffset, x + wid + xOffset, y + yOffset, overButton() ? 0xFF0000FF : 0xFFFFFFFF);
+  }
+
+  bool overButton() {
+    int wid = 10;
+    int gap = 2;
+    int xOffset = width ~/ 2 - (wid + gap);
+    int left = x + xOffset;
+    int right = left + wid * 2 + gap * 2;
+    return inElement(uiManager.lastMouseX, uiManager.getMouseY()) && uiManager.lastMouseX > left && uiManager.lastMouseX < right;
   }
 
   @override

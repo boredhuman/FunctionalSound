@@ -51,4 +51,9 @@ class InputSegment extends LabelSegment {
       drawLine(x, y + height ~/ 2, input!.x + input!.width, input!.y + input!.height ~/ 2, 0xFF0000FF, lineWidth: 5);
     }
   }
+
+  @override
+  bool isOver() {
+    return clickedInputNode();
+  }
 }

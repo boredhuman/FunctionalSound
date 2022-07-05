@@ -22,4 +22,8 @@ abstract class Segment {
   bool handleEvent(Event event) {
     return false;
   }
+
+  bool isOver() {
+    return false;
+  }
 }

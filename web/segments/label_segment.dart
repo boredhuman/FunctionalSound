@@ -29,21 +29,15 @@ class LabelSegment extends Segment {
   render() {
     int bottomPad = (height - 32) ~/ 2;
     int renderY = y + bottomPad;
-    int textStart = 0;
-    textStart += leftPad;
+    int textStart = getTextStart();
     switch (alignment) {
       case Alignment.left:
-        textStart += x;
         drawString(text, textStart, renderY, textColor);
         break;
       case Alignment.center:
-        int strWidth = fontRenderer!.getStringWidth(text);
-        textStart += x + (width ~/ 2) - (strWidth ~/ 2);
         drawString(text, textStart, renderY, textColor);
         break;
       default:
-        int width = fontRenderer!.getStringWidth(text);
-        textStart += x - width;
         drawString(text, textStart, renderY, textColor);
         break;
     }
@@ -57,6 +51,28 @@ class LabelSegment extends Segment {
         drawCaret(textStart);
       }
     }
+  }
+
+  int getTextStart() {
+    int textStart = leftPad;
+    switch(alignment) {
+      case Alignment.left:
+        textStart += x;
+        break;
+      case Alignment.center:
+        int strWidth = fontRenderer!.getStringWidth(text);
+        textStart += x + (width ~/ 2) - (strWidth ~/ 2);
+        break;
+      default:
+        int width = fontRenderer!.getStringWidth(text);
+        textStart += x - width;
+        break;
+    }
+    return textStart;
+  }
+
+  int getStringWidth() {
+    return fontRenderer!.getStringWidth(text);
   }
 
   drawCaret(int textStart) {
@@ -80,6 +96,27 @@ class LabelSegment extends Segment {
     int mouseY = uiManager.clientHeight - event.client.y.toInt();
 
     selected = inElement(mouseX, mouseY);
+    int textStart = getTextStart();
+    int stringWidth = getStringWidth();
+
+    if (mouseX > textStart + stringWidth) {
+      caretPosition = 0;
+    } else if (mouseX < textStart) {
+      caretPosition = text.length;
+    } else {
+      
+      int i = 0;
+      int totalWidth = 0;
+      for (int letter in text.codeUnits) {
+        int width = fontRenderer!.getLetterWidth(letter);
+        totalWidth += i == 0 ? width ~/ 2 : width;
+        if (mouseX < totalWidth + textStart) {
+          caretPosition = text.length - i;
+          break;
+        }
+        i++;
+      }
+    }
   }
 
   handleKeyboard(KeyboardEvent event) {

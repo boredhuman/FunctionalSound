@@ -25,6 +25,12 @@ class UIManager {
   late Node outputNode;
   late Node timeNode;
 
+  bool draggingBackground = false;
+  int lastDragX = 0;
+  int lastDragY = 0;
+
+  List<Node> consumedDown = [];
+
   UIManager(this.canvas) {
     consoleLog("initializing ui manager");
 
@@ -33,20 +39,49 @@ class UIManager {
     });
 
     canvas.onMouseDown.listen((event) {
-      for (var element in elements) {
-        element.handleMouseDown(event);
+      if (!overNodes()) {
+        print('dragging background');
+        lastDragX = lastMouseX;
+        lastDragY = getMouseY();
+        draggingBackground = true;
+        return;
+      }
+
+      for (Node element in elements) {
+        if (element.handleMouseDown(event)) {
+          consumedDown.add(element);
+          return;
+        } else {
+          consumedDown.add(element);
+        }
       }
     });
 
     canvas.onMouseUp.listen((event) {
-      for (var element in elements) {
+      if (draggingBackground) {
+        draggingBackground = false;
+        return;
+      }
+
+      for (Node element in consumedDown) {
         element.handleMouseUp(event);
       }
+      consumedDown.clear();
     });
 
     canvas.onMouseMove.listen((event) {
       lastMouseX = event.client.x.toInt();
       lastMouseY = event.client.y.toInt();
+    });
+
+    canvas.onDoubleClick.listen((event) {
+      if (!overNodes()) {
+        Node newElement = Node(lastMouseX - 200, getMouseY(), 400, renderOutput: true);
+        newElement.addSegment(LabelSegment("Unnamed"));
+        newElement.addSegment(AddSegment());
+        newElement.y -= newElement.height;
+        elements.add(newElement);
+      }
     });
 
     // for some reason does not work with backspace
@@ -98,6 +133,22 @@ class UIManager {
   }
 
   void render() {
+    canvas.width = document.body?.clientWidth;
+    canvas.height = document.body?.clientHeight;
+    gl.viewport(0, 0, canvas.width!, canvas.height!);
+
+    if (draggingBackground) {
+      int deltaX = lastDragX - lastMouseX;
+      int deltaY = lastDragY - getMouseY();
+      for (Node element in elements) {
+        element.x -= deltaX;
+        element.y -= deltaY;
+      }
+
+      lastDragX = lastMouseX;
+      lastDragY = uiManager.getMouseY();
+    }
+
     for (Node element in elements) {
       element.render(lastMouseX, uiManager.getMouseY());
     }
@@ -119,6 +170,15 @@ class UIManager {
     }
   }
 
+  bool overNodes() {
+    for (Node node in elements) {
+      if (node.isOverNode()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   bool handleMouseEvent(MouseEvent event) {
     Object? clickedNode;
     bool isOutput = false;
@@ -135,9 +195,7 @@ class UIManager {
       }
       for (Segment segment in element.segments) {
         if (segment is InputSegment) {
-          print("Asking ${segment.runtimeType} ");
           if (segment.clickedInputNode()) {
-            print("Clicked segment");
             clickedNode = segment;
             break;
           }
