@@ -1,12 +1,11 @@
 import 'dart:html';
 import 'dart:web_gl';
-import 'audio_manager.dart';
+import 'sound/audio_manager.dart';
 import 'render/font_renderer.dart';
 import 'render/matrix_stack.dart';
 import 'ui_manager.dart';
 import 'render/buffer_builder.dart';
 import 'render/font_atlas.dart';
-import 'util/mat4.dart';
 import 'util/util.dart';
 
 RenderingContext gl = setupWebGL();
@@ -14,13 +13,13 @@ FontTexture fontTexture = FontTexture();
 FontRenderer? fontRenderer;
 BufferBuilder bufferBuilder = BufferBuilder();
 late UIManager uiManager;
-AudioManager audioManager = AudioManager();
 MatrixStack matrixStack = MatrixStack();
+AudioManager audioManager = AudioManager();
 
 void main() {
   fontRenderer = FontRenderer(fontTexture);
   uiManager = UIManager(document.getElementById("canvas") as CanvasElement);
-
+  audioManager.init();
   renderLoop();
 }
 
@@ -40,7 +39,9 @@ void renderLoop() {
     consoleLog("Got error: $error");
   }
 
-  window.requestAnimationFrame((highResTime) {renderLoop();});
+  window.requestAnimationFrame((highResTime) {
+    renderLoop();
+  });
 }
 
 RenderingContext setupWebGL() {

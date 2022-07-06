@@ -116,6 +116,7 @@ class UIManager {
     timeNode.addSegment(LabelSegment("Time"));
     TimeSegment timeSegment = TimeSegment();
     timeSegment.onclick = () {
+      audioManager.cycle();
       backPropagate();
     };
     timeNode.addSegment(timeSegment);
@@ -236,7 +237,7 @@ class UIManager {
         String expression = resolveInputs(outputNode.input!, expressionSegment);
 
         print(expression);
-        audioManager.playSound(expression);
+        audioManager.setExpression(expression);
       }
     }
   }
