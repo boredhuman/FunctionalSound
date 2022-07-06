@@ -24,10 +24,6 @@ class AudioManager {
   }
 
   void setExpression(String expression) {
-    if (context.state == "running") {
-      cycle();
-    }
-
     var data = parser.toVMFormat(parser.parse(expression), {});
     vmPort.postMessage(data);
   }
