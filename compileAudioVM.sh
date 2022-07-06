@@ -1,0 +1,1 @@
+asc -Ospeed --optimizeLevel 3 --converge --noAssert --exportRuntime --outFile ./web/sound/audioVM.wasm ./web/sound/audioVM.ts

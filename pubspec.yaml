@@ -4,7 +4,7 @@ version: 1.0.0
 # homepage: https://www.example.com
 
 environment:
-  sdk: '>=2.18.0-edge.e1a73506d96ab9e820a4260b57bc30ff193e4def <3.0.0'
+  sdk: '>=2.17.1 <3.0.0'
 
 # dependencies:
 #   path: ^1.7.0
@@ -15,5 +15,4 @@ dev_dependencies:
   lints: ^2.0.0
 dependencies:
   js: ^0.6.4
-  math_expressions: ^2.3.0
-
+  complex: any
