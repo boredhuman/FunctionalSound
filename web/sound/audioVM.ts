@@ -3,22 +3,22 @@ enum InstructionType { ADD, SUB, MUL, DIV, PUSHC, PUSHV, NEG, FUN, FUN_2, PUSH_T
 let timeStep: f64;
 let sampleRate: f64;
 let time: f64 = 0;
-let stack: Float32Array;
+let stack: Float64Array;
 let stackIndex: i32 = 0;
 
-export function generateSamples(instructions: Float32Array, buffer: Float32Array): void {
+export function generateSamples(instructions: Float64Array, buffer: Float64Array): void {
     for (let i = 0; i < buffer.length; i++) {
-        let sample: f32 = interpret(instructions);
+        let sample: f64 = interpret(instructions);
         buffer[i] = sample;
         time += timeStep;
     }
 }
 
-export function createArray(length: i32): Float32Array {
-    return new Float32Array(length);
+export function createArray(length: i32): Float64Array {
+    return new Float64Array(length);
 }
 
-export function setArray(array: Float32Array, index: i32, value: f32): void {
+export function setArray(array: Float64Array, index: i32, value: f64): void {
     array[index] = value;
 }
 
@@ -28,15 +28,15 @@ export function setSampleRate(rate: f64): void {
 }
 
 export function resetStack(size: i32): void {
-    stack = new Float32Array(size);
+    stack = new Float64Array(size);
     __collect(); // GC
 }
 
-let a: f32;
-let b: f32;
-let value: f32;
+let a: f64;
+let b: f64;
+let value: f64;
 
-function interpret(instructions: Float32Array): f32 {
+function interpret(instructions: Float64Array): f64 {
     stackIndex = 0;
 
     for (let i: i32 = 0; i < instructions.length; i++) {
@@ -87,7 +87,7 @@ function interpret(instructions: Float32Array): f32 {
                 push(applyFunction(value as i32, b, a));
                 break;
             case InstructionType.PUSH_TIME:
-                push(<f32>(time));
+                push(time);
                 break;
             case InstructionType.NOP:
                 break;
@@ -97,43 +97,43 @@ function interpret(instructions: Float32Array): f32 {
     return pop();
 }
 
-function pop(): f32 {
+function pop(): f64 {
     return stack[--stackIndex];
 }
 
-function push(value: f32): void {
+function push(value: f64): void {
     stack[stackIndex++] = value;
 }
 
-function applyFunction(index: i32, a: f32, b: f32): f32 {
+function applyFunction(index: i32, a: f64, b: f64): f64 {
     switch (index) {
         case 0:
             return sin2(a);
         case 1:
-            return Mathf.cos(a);
+            return Math.cos(a);
         case 2:
-            return Mathf.tan(a);
+            return Math.tan(a);
         case 3:
-            return Mathf.sinh(a);
+            return Math.sinh(a);
         case 4:
-            return Mathf.cosh(a);
+            return Math.cosh(a);
         case 5:
-            return Mathf.tanh(a);
+            return Math.tanh(a);
         case 6:
         case 7:
-            return Mathf.asin(a);
+            return Math.asin(a);
         case 8:
         case 9:
-            return Mathf.acos(a);
+            return Math.acos(a);
         case 10:
         case 11:
-            return Mathf.atan(a);
+            return Math.atan(a);
         case 12:
             return abs(a);
         case 13:
-            return Mathf.log(a);
+            return Math.log(a);
         case 14:
-            return Mathf.log10(a);
+            return Math.log10(a);
         case 15:
             return floor(a);
         case 16:
@@ -143,13 +143,13 @@ function applyFunction(index: i32, a: f32, b: f32): f32 {
         case 18:
             return a % b;
         case 19:
-            return Mathf.sign(a);
+            return Math.sign(a);
         case 20:
-            return Mathf.pow(a, b);
+            return Math.pow(a, b);
         case 21:
             return sqrt(a);
         case 22:
-            return Mathf.exp(a);
+            return Math.exp(a);
         case 23:
             return min(a, b);
         case 24:
@@ -160,8 +160,8 @@ function applyFunction(index: i32, a: f32, b: f32): f32 {
 }
 
 // TODO: Lookup table?
-function sin2(val: f32): f32 { // Fast and decently accurate sin approximation
-  let f: f32 = val * 0.15915;
+function sin2(val: f64): f64 { // Fast and decently accurate sin approximation
+  let f: f64 = val * 0.15915;
   f = f - trunc(f);
   return f < 0.5 ? (-16.0 * f * f) + (8.0 * f) : (16.0 * f * f) - (16.0 * f) - (8.0 * f) + 8.0;
 }

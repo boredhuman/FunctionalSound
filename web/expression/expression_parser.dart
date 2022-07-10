@@ -118,6 +118,7 @@ class ExpressionParser {
           break;
         case InstructionType.PUSH_TIME:
           stackSize++;
+          maxSize = Math.max(stackSize, maxSize);
           break;
       }
     }
