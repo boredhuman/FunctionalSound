@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:web_gl';
 
 import '../render/render_util.dart';
 import "../main.dart";
@@ -20,6 +21,7 @@ class LabelSegment extends Segment {
   bool selected = false;
   // when caret is at end of text its equal to 0,
   int caretPosition = 0;
+  // push text away from left
   int leftPad = 0;
   int minTextLength = 0;
 
@@ -27,9 +29,15 @@ class LabelSegment extends Segment {
 
   @override
   render() {
+    // hide overflow
+    gl.enable(WebGL.SCISSOR_TEST);
+    gl.scissor(x, y, width, height);
+
     int bottomPad = (height - 32) ~/ 2;
     int renderY = y + bottomPad;
-    int textStart = getTextStart();
+    int stringWidth = getStringWidth();
+    int textStart = getTextStart(stringWidth);
+
     switch (alignment) {
       case Alignment.left:
         drawString(text, textStart, renderY, textColor);
@@ -51,21 +59,31 @@ class LabelSegment extends Segment {
         drawCaret(textStart);
       }
     }
+
+    gl.disable(WebGL.SCISSOR_TEST);
   }
 
-  int getTextStart() {
+  int getTextStart(int strWidth) {
     int textStart = leftPad;
+
+    int overflow = 0;
+
+    if (strWidth > width) {
+      overflow = strWidth - width;
+      textStart -= 3; // space for caret
+    }
+
     switch(alignment) {
       case Alignment.left:
+        textStart -= overflow;
         textStart += x;
         break;
       case Alignment.center:
-        int strWidth = fontRenderer!.getStringWidth(text);
+        textStart -= overflow ~/ 2;
         textStart += x + (width ~/ 2) - (strWidth ~/ 2);
         break;
       default:
-        int width = fontRenderer!.getStringWidth(text);
-        textStart += x - width;
+        textStart += x + width - strWidth;
         break;
     }
     return textStart;
@@ -96,11 +114,13 @@ class LabelSegment extends Segment {
     int mouseY = uiManager.clientHeight - event.client.y.toInt();
 
     selected = inElement(mouseX, mouseY);
-    int textStart = getTextStart();
     int stringWidth = getStringWidth();
+    int textStart = getTextStart(stringWidth);
 
+    // too far to the right place caret at end
     if (mouseX > textStart + stringWidth) {
       caretPosition = 0;
+      // too far to the left place caret at beginning
     } else if (mouseX < textStart) {
       caretPosition = text.length;
     } else {
