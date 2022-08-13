@@ -3,6 +3,7 @@ import 'dart:html';
 import '../main.dart';
 import '../render/render_util.dart';
 import 'segment.dart';
+import 'segment_factory.dart';
 
 class Node {
   List<Segment> segments = [];
@@ -170,5 +171,37 @@ class Node {
   // return true to stop it passing event to segments
   bool handleMouseEvent(MouseEvent mouseEvent) {
     return false;
+  }
+
+  static Node fromMap(Map data) {
+    Node node = Node(data["x"], data["y"], data["width"], renderOutput: data["renderOutput"], renderInput: data["renderInput"]);
+    List<dynamic> segmentMaps = data["segments"];
+    for (dynamic segmentMap in segmentMaps) {
+      String segmentType = segmentMap["type"];
+      Segment Function(Map data) factory = SegmentFactory.segmentFactories[segmentType]!;
+      Segment segment = factory(segmentMap);
+      node.addSegment(segment);
+    }
+    return node;
+  }
+
+  Map<String, Object> toMap() {
+    List<Map> segmentMaps = [];
+
+    for (Segment segment in segments) {
+      Map segmentMap = segment.toMap();
+      segmentMap["type"] = segment.runtimeType.toString();
+      segmentMaps.add(segmentMap);
+    }
+
+    return {
+      "x" : x,
+      "y" : y,
+      "width" : width,
+      "renderOutput" : renderOutput,
+      "renderInput" : renderInput,
+      "segments" : segmentMaps,
+      "inputIndex": input == null ? -1 : uiManager.elements.indexOf(input!)
+    };
   }
 }

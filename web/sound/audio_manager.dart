@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:web_audio';
 import 'package:js/js_util.dart' as reflection;
 import '../expression/expression_parser.dart';
+import '../util/util.dart';
 
 class AudioManager {
   AudioContext context = AudioContext();
@@ -24,6 +25,7 @@ class AudioManager {
   }
 
   void setExpression(String expression) {
+    consoleLog("Playing " + expression);
     var data = parser.toVMFormat(parser.parse(expression), {});
     vmPort.postMessage(data);
   }

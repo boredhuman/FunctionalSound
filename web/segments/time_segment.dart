@@ -2,16 +2,24 @@ import '../render/render_util.dart';
 import "../main.dart";
 import "dart:html";
 
+import 'click_listener.dart';
 import 'segment.dart';
 
 class TimeSegment extends Segment {
   Function? onclick;
   bool playing = false;
 
-  TimeSegment() : super(40);
+  TimeSegment() : super(40) {
+    addListener(ClickListener<TimeSegment>((segment) {
+      audioManager.cycle();
+      uiManager.backPropagate();
+      playing = !playing;
+    }));
+  }
 
   @override
   render() {
+    super.render();
     if (playing) {
       renderPlayButton();
     } else {
@@ -51,6 +59,7 @@ class TimeSegment extends Segment {
 
   @override
   bool handleEvent(Event event) {
+    super.handleEvent(event);
     if (!inElement(uiManager.lastMouseX, uiManager.getMouseY())) {
       return false;
     }
@@ -59,5 +68,16 @@ class TimeSegment extends Segment {
       onclick!.call();
     }
     return false;
+  }
+
+  set setPlaying(bool playing) => this.playing = playing;
+
+  static TimeSegment fromMap(data) {
+    return TimeSegment();
+  }
+
+  @override
+  Map toMap() {
+    return {};
   }
 }

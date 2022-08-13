@@ -2,6 +2,7 @@ import 'dart:html';
 
 import '../render/render_util.dart';
 import "../main.dart";
+import '../util/util.dart';
 import 'expression_segment.dart';
 import 'input_segment.dart';
 import 'segment.dart';
@@ -13,33 +14,27 @@ class AddSegment extends Segment {
 
   @override
   render() {
-    int mouseY = uiManager.getMouseY();
+    super.render();
 
     if (forExpressionSegment) {
-      int color = overCross(x + width ~/ 2, y + height ~/ 2, 30, uiManager.lastMouseX, mouseY) ? 0xFF0000FF : 0xFFFFFFFF;
-      drawCross(x + width ~/ 2, y + height ~/ 2, 30, color);
+      int color = overCross(x + width ~/ 2, y + height ~/ 2, 30) ? 0xFF0000FF : 0xFFFFFFFF;
+      drawRoundedCross(x + width ~/ 2, y + height ~/ 2, 30, color);
     } else {
-      int color = overCross(x + 20, y + height ~/ 2, 21, uiManager.lastMouseX, mouseY) ? 0xFF0000FF : 0xFFFFFFFF;
+      int color = overCross(x + 20, y + height ~/ 2, 21) ? 0xFF0000FF : 0xFFFFFFFF;
       // left cross
-      drawCross(x + 20, y + height ~/ 2, 21, color);
+      drawRoundedCross(x + 20, y + height ~/ 2, 21, color);
       int bottomPad = (height - 32) ~/ 2;
       drawString("Add Input", x + 40, y + bottomPad, 0xFFFFFFFF);
     }
   }
 
-  bool overCross(int x, int y, int width, int mouseX, int mouseY) {
-    int half = width ~/ 2;
-    return mouseX > x - half && mouseY > y - half && mouseX < x + half && mouseY < y + half;
-  }
-
   bool over() {
-    int mouseY = uiManager.getMouseY();
-
-    return overCross(x + width ~/ 2, y + height ~/ 2, 30, uiManager.lastMouseX, mouseY);
+    return overCross(x + width ~/ 2, y + height ~/ 2, 30);
   }
 
   @override
   bool handleEvent(Event event) {
+    super.handleEvent(event);
     if (event is MouseEvent) {
       if (handleMouseEvent(event)) {
         return true;
@@ -57,8 +52,7 @@ class AddSegment extends Segment {
       return true;
     }
 
-    int mouseY = uiManager.getMouseY();
-    bool overLeftCross = overCross(x + 20, y + height ~/ 2, 21, uiManager.lastMouseX, mouseY);
+    bool overLeftCross = overCross(x + 20, y + height ~/ 2, 21);
     if (overLeftCross && !forExpressionSegment) {
       parent!.removeSegment(this);
       int index = 0;
@@ -73,5 +67,14 @@ class AddSegment extends Segment {
       return true;
     }
     return false;
+  }
+
+  static AddSegment fromMap(Map data) {
+    return AddSegment(forExpressionSegment: data["forExpressionSegment"]);
+  }
+
+  @override
+  Map toMap() {
+    return {"forExpressionSegment" : forExpressionSegment};
   }
 }

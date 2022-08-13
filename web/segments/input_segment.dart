@@ -9,9 +9,9 @@ class InputSegment extends LabelSegment {
   Node? input;
   int index;
 
-  InputSegment(this.index) : super("") {
+  InputSegment(this.index, [String? inputName]) : super("", deletable: true) {
     alignment = Alignment.left;
-    super.text = "i$index : input $index";
+    super.text = "i$index : ${inputName ?? "input $index"}";
     leftPad = 10;
     // prevent "ix : " from being removed only right side should be modifiable
     minTextLength = 5;
@@ -19,6 +19,7 @@ class InputSegment extends LabelSegment {
 
   @override
   render() {
+    super.render();
     int color = clickedInputNode() ? 0xFF0000FF : 0xFFFFFFFF;
     if (uiManager.selectedNode != null && uiManager.selectedNode == this) {
       color = 0x00FF00FF;
@@ -55,5 +56,22 @@ class InputSegment extends LabelSegment {
   @override
   bool isOver() {
     return clickedInputNode();
+  }
+
+  String get indexName => text.substring(text.indexOf(":") + 2);
+
+  static InputSegment fromMap(Map data) {
+    InputSegment segment = InputSegment(data["index"], data["indexName"]);
+    LabelSegment.applyMapData(segment, data);
+    return segment;
+  }
+
+  @override
+  Map toMap() {
+    Map data = super.toMap();
+    data["index"] = index;
+    data["indexName"] = indexName;
+    data["inputIndex"] = input == null ? -1 : uiManager.elements.indexOf(input!);
+    return data;
   }
 }

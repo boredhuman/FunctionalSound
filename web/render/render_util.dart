@@ -47,7 +47,17 @@ drawLine(int x1, int y1, int x2, int y2, int color, {int lineWidth = 1}) {
 }
 
 drawCross(int x, int y, int width, int color) {
+  int wid = width ~/ 3;
+  int half = width ~/ 2;
+  x -= half;
+  y -= half;
+  // horizontal quad
+  drawQuad(x, y + wid * 2, x + width, y + wid, color);
+  // vertical quad
+  drawQuad(x + wid, y + width, x + wid * 2, y, color);
+}
 
+drawRoundedCross(int x, int y, int width, int color) {
   int wid = width ~/ 3;
   int half = width ~/ 2;
   x -= half;
