@@ -497,26 +497,33 @@ class Engine extends AudioWorkletProcessor {
                 });
             } else {
                 const instructions = event.data; // Float64
+                const messageType = instructions[0];
+                switch (messageType) {
+                    case 0:
 
-                if (this.instructionPointer != null) {
-                    this.vm.__unpin(this.instructionPointer);
-                    this.vm.__collect(); // GC
-                }
+                        if (this.instructionPointer != null) {
+                            this.vm.__unpin(this.instructionPointer);
+                            this.vm.__collect(); // GC
+                        }
 
-                this.vm.setSampleRate(sampleRate);
-                this.vm.resetStack(instructions[0]); // First element is the required stack size
+                        this.vm.setSampleRate(sampleRate);
+                        this.vm.resetStack(instructions[1]); // second element is the required stack size
 
-                this.instructionPointer = this.vm.__pin(this.vm.createArray(instructions.length - 1));
+                        this.instructionPointer = this.vm.__pin(this.vm.createArray(instructions.length - 2));
 
-                for (let i = 1; i < instructions.length; i++) {
-                    this.vm.setArray(this.instructionPointer, i - 1, instructions[i]);
+                        for (let i = 2; i < instructions.length; i++) {
+                            this.vm.setArray(this.instructionPointer, i - 2, instructions[i]);
+                        }
+                        break;
+                    case 1:
+                        this.vm.resetTime();
                 }
             }
         };
     }
 
     process(inputs, outputs, parameters) {
-        if (this.vm == null) {
+        if (this.vm == null || this.instructionPointer == null) {
             return true;
         }
 

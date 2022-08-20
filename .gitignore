@@ -7,3 +7,5 @@ build/
 
 **/.idea/*
 pubspec.lock
+/web/package-lock.json
+/web/node_modules/

@@ -7,10 +7,10 @@ import "../main.dart";
 import "dart:html";
 
 import '../util/util.dart';
-import 'click_listener.dart';
 import 'dynamic_listener.dart';
 import 'input_segment.dart';
 import 'segment.dart';
+import '../segments/nodes.dart';
 
 enum Alignment {
   left,
@@ -39,7 +39,18 @@ class LabelSegment extends Segment {
             segment.parent!.removeSegment(segment);
             // assume is the label segment representing the title
           } else {
-            uiManager.elements.remove(segment.parent!);
+            if (segment.parent != null) {
+              uiManager.elements.remove(segment.parent);
+
+              for (Node element in uiManager.elements) {
+                if (element == segment.parent) {
+                  continue;
+                }
+                if (segment.parent == element.input) {
+                  element.input = null;
+                }
+              }
+            }
           }
         }
         return false;

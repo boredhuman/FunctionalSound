@@ -63,7 +63,8 @@ class ExpressionParser {
 
     // TODO: Optimize instructions here (precompute everything that can be precomputed)
 
-    data.add(_computeMaxStackSize(instructions) as double); // First element in list is the required stack size
+    data.add(0); // first element in list is the message type
+    data.add(_computeMaxStackSize(instructions) as double); // second element in list is the required stack size
 
     for (Instruction instruction in instructions) {
       data.add(InstructionType.values.indexOf(instruction.type) as double);

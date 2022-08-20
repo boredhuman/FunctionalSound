@@ -2,12 +2,16 @@ import 'dart:html';
 import 'dart:web_audio';
 import 'package:js/js_util.dart' as reflection;
 import '../expression/expression_parser.dart';
-import '../util/util.dart';
 
 class AudioManager {
   AudioContext context = AudioContext();
   ExpressionParser parser = ExpressionParser();
   late MessagePort vmPort;
+  int playStart = -1;
+  // pausetime is equal to the last pause or -1 if its not paused
+  int pauseTime = -1;
+  int totalPlayTime = 0;
+  String? currentExpression;
 
   void init() async {
     reflection.callMethod(reflection.getProperty(context, 'audioWorklet'), 'addModule', ['sound/engine_wasm.js']);
@@ -24,17 +28,44 @@ class AudioManager {
     vmPort.postMessage(audioVM); // Send WASM bytes to audio worklet
   }
 
-  void setExpression(String expression) {
-    consoleLog("Playing " + expression);
-    var data = parser.toVMFormat(parser.parse(expression), {});
-    vmPort.postMessage(data);
+  bool setExpression(String expression) {
+    if (currentExpression == expression) {
+      return true;
+    }
+    try {
+      currentExpression = expression;
+      var data = parser.toVMFormat(parser.parse(expression), {});
+      vmPort.postMessage(data);
+      playStart = DateTime.now().millisecondsSinceEpoch;
+      return true;
+    } on Exception {
+      return false;
+    }
+  }
+
+  void resetTime() {
+    playStart = DateTime.now().millisecondsSinceEpoch;
+    vmPort.postMessage([1]);
+    totalPlayTime = 0;
   }
 
   void cycle() {
     if (context.state == "running") {
       context.suspend();
+      pauseTime = DateTime.now().millisecondsSinceEpoch;
+      totalPlayTime += pauseTime - playStart;
     } else if (context.state == "suspended") {
       context.resume();
+      pauseTime = -1;
+      playStart = DateTime.now().millisecondsSinceEpoch;
+    }
+  }
+
+  int getRenderTime() {
+    if (pauseTime != -1) {
+      return totalPlayTime;
+    } else {
+      return totalPlayTime + (DateTime.now().millisecondsSinceEpoch - playStart);
     }
   }
 }

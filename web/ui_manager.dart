@@ -13,6 +13,7 @@ import 'segments/input_segment.dart';
 import 'segments/label_segment.dart';
 import 'segments/render_listener.dart';
 import 'segments/segment.dart';
+import 'segments/time_elapsed_segment.dart';
 import 'segments/time_segment.dart';
 import 'util/save_load.dart';
 import 'util/util.dart';
@@ -129,15 +130,16 @@ class UIManager {
   }
 
   void loadDefault() {
-    timeNode = Node(100, 500, 200, renderOutput: true);
+    timeNode = Node(400, 450, 200, renderOutput: true);
     timeNode.addSegment(LabelSegment("Time", mutableName: false));
+    timeNode.addSegment(TimeElapsedSegment());
     timeNode.addSegment(TimeSegment());
 
-    Node exampleNode = Node(400, 450, 400);
+    Node exampleNode = Node(700, 450, 400);
     exampleNode.addSegment(LabelSegment("Example", deletable: true));
     exampleNode.addSegment(AddSegment());
 
-    outputNode = Node(900, 500, 200, renderInput: true, renderOutput: false);
+    outputNode = Node(1200, 500, 200, renderInput: true, renderOutput: false);
     outputNode.addSegment(LabelSegment("Output", mutableName: false));
 
     elements.add(timeNode);
@@ -377,18 +379,18 @@ class UIManager {
 
     return clickedNode != null;
   }
-
-  void backPropagate() {
+  // returns true if managed to send instructions to vm without errors
+  bool backPropagate() {
     if (outputNode.input != null) {
       ExpressionSegment? expressionSegment = getExpressionSegment(outputNode.input!);
 
       if (expressionSegment != null) {
         String expression = resolveInputs(outputNode.input!, expressionSegment);
 
-        print(expression);
-        audioManager.setExpression(expression);
+        return audioManager.setExpression(expression);
       }
     }
+    return false;
   }
 
   String resolveInputs(Node node, ExpressionSegment expressionSegment) {

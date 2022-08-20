@@ -32,6 +32,10 @@ export function resetStack(size: i32): void {
     __collect(); // GC
 }
 
+export function resetTime(): void {
+    time = 0;
+}
+
 let a: f64;
 let b: f64;
 let value: f64;
