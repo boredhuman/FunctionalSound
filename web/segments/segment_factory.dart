@@ -3,6 +3,7 @@ import 'expression_segment.dart';
 import 'input_segment.dart';
 import 'label_segment.dart';
 import 'segment.dart';
+import 'time_elapsed_segment.dart';
 import 'time_segment.dart';
 
 class SegmentFactory {
@@ -11,6 +12,7 @@ class SegmentFactory {
     "ExpressionSegment" : ((data) {return ExpressionSegment.fromMap(data);}),
     "InputSegment" : ((data) {return InputSegment.fromMap(data);}),
     "LabelSegment" : ((data) {return LabelSegment.fromMap(data);}),
-    "TimeSegment" : ((data) {return TimeSegment.fromMap(data);})
+    "TimeSegment" : ((data) {return TimeSegment.fromMap(data);}),
+    "TimeElapsedSegment" : ((data) {return TimeElapsedSegment.fromMap(data);})
   };
 }

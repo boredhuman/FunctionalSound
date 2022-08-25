@@ -112,7 +112,7 @@ function push(value: f64): void {
 function applyFunction(index: i32, a: f64, b: f64): f64 {
     switch (index) {
         case 0:
-            return sin2(a);
+            return Math.sin(a);
         case 1:
             return Math.cos(a);
         case 2:

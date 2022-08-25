@@ -273,7 +273,8 @@ class LabelSegment extends Segment {
       "textColor" : textColor,
       "leftPad" : leftPad,
       "minTextLength" : minTextLength,
-      "mutableName" : mutableName
+      "mutableName" : mutableName,
+      "deletable" : deletable
     };
   }
 }
