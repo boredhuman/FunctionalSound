@@ -1,6 +1,7 @@
 import 'dart:html';
 import 'dart:web_audio';
 import 'package:js/js_util.dart' as reflection;
+import '../expression/compiler.dart';
 import '../expression/expression_parser.dart';
 
 class AudioManager {
@@ -32,12 +33,19 @@ class AudioManager {
     if (currentExpression == expression) {
       return true;
     }
+    print("Setting expression $expression");
     try {
       currentExpression = expression;
-      var data = parser.toVMFormat(parser.parse(expression), {});
-      vmPort.postMessage(data);
-      playStart = DateTime.now().millisecondsSinceEpoch;
-      return true;
+      List<Instruction>? instructions = parser.parse(expression);
+      if (instructions != null) {
+        var data = parser.toVMFormat(instructions, {});
+        vmPort.postMessage(data);
+        playStart = DateTime
+            .now()
+            .millisecondsSinceEpoch;
+        return true;
+      }
+      return false;
     } on Exception {
       return false;
     }

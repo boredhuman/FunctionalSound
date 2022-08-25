@@ -92,7 +92,6 @@ class Tokenizer {
           String? function = _searchFunction(s, i);
 
           if (function != null) {
-            // TODO: Are there any functions we want to support that take 3 parameters?
             _Function func = _functions[function]!;
             t = Token(function, func.twoParameters ? TokenType.FUNCTION_2 : TokenType.FUNCTION);
             i += function.length - 1;

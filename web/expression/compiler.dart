@@ -15,7 +15,7 @@ class Instruction {
 }
 
 class Compiler {
-  List<Instruction> compileGroup(Group group, Tokenizer tokenizer) {
+  List<Instruction>? compileGroup(Group group, Tokenizer tokenizer) {
     List<Instruction> list = [];
     Stack<Token> operatorStack = Stack();
 
@@ -27,7 +27,7 @@ class Compiler {
 
         if (token.type == TokenType.OPERATOR) {
           if (i == 0 || i >= group.tokens.length - 1) {
-            // TODO: Handle invalid
+            return null;
           }
 
           operatorStack.push(token);
@@ -49,10 +49,9 @@ class Compiler {
           }
         }
       } else if (t.group != null) {
-        list.addAll(compileGroup(t.group!, tokenizer));
+        list.addAll(compileGroup(t.group!, tokenizer)!);
 
         if (t.functionName != null) {
-          // TODO: Are there any functions we want to support that take 3 parameters?
           if (tokenizer.isTwoParamFunction(t.functionName!)) {
             list.add(Instruction(InstructionType.FUN_2, t.functionName!));
           } else {

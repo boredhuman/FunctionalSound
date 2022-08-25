@@ -46,9 +46,13 @@ class ExpressionParser {
     tokenizer.addFunction("max", true, index++);
   }
 
-  List<Instruction> parse(String expression) {
+  List<Instruction>? parse(String expression) {
     List<Token> tokens = tokenizer.tokenize(expression);
     Group group = grouper.groupTokens(tokens);
+    if (!grouper.verifyGroups(group)) {
+      print("Invalid expression");
+      return null;
+    }
     return compiler.compileGroup(group, tokenizer);
   }
 
