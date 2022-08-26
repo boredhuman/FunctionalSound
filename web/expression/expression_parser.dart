@@ -49,7 +49,7 @@ class ExpressionParser {
   List<Instruction>? parse(String expression) {
     List<Token> tokens = tokenizer.tokenize(expression);
     Group group = grouper.groupTokens(tokens);
-    if (!grouper.verifyGroups(group)) {
+    if (!_verifyGroup(group)) {
       print("Invalid expression");
       return null;
     }
@@ -84,6 +84,37 @@ class ExpressionParser {
     Float64List list = Float64List(data.length);
     list.setAll(0, data);
     return list;
+  }
+
+  bool _verifyGroup(Group g) {
+    for (GroupToken group in g.tokens) {
+      if (group.functionName != null) {
+        if (tokenizer.isTwoParamFunction(group.functionName!)) {
+          if (group.group == null) {
+            return false;
+          }
+          List<GroupToken> tokens = group.group!.tokens;
+          if (tokens.length != 3) {
+            return false;
+          }
+          if (tokens[1].token == null || tokens[1].token!.type != TokenType.COMMA) {
+            return false;
+          }
+          if (tokens[0].group != null) {
+            if (!_verifyGroup(tokens[0].group!)) {
+              return false;
+            }
+          }
+          if (tokens[2].group != null) {
+            if (!_verifyGroup(tokens[2].group!)) {
+              return false;
+            }
+          }
+          return true;
+        }
+      }
+    }
+    return true;
   }
 
   int _computeMaxStackSize(List<Instruction> instructions) {

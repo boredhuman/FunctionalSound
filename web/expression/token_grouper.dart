@@ -63,37 +63,6 @@ class TokenGrouper {
     return startingGroup;
   }
 
-  bool verifyGroups(Group g) {
-    for (GroupToken group in g.tokens) {
-      if (group.functionName != null) {
-        if (audioManager.parser.tokenizer.isTwoParamFunction(group.functionName!)) {
-          if (group.group == null) {
-            return false;
-          }
-          List<GroupToken> tokens = group.group!.tokens;
-          if (tokens.length != 3) {
-            return false;
-          }
-          if (tokens[1].token == null || tokens[1].token!.type != TokenType.COMMA) {
-            return false;
-          }
-          if (tokens[0].group is GroupToken) {
-            if (!verifyGroups(tokens[0].group!)) {
-              return false;
-            }
-          }
-          if (tokens[2].group is GroupToken) {
-            if (!verifyGroups(tokens[2].group!)) {
-              return false;
-            }
-          }
-          return true;
-        }
-      }
-    }
-    return true;
-  }
-
   String visualizeGroup(Group g) {
     String str = "";
 
