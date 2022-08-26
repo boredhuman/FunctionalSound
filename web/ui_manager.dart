@@ -394,7 +394,7 @@ class UIManager {
   }
 
   String resolveInputs(Node node, ExpressionSegment expressionSegment) {
-    String expression = expressionSegment.text;
+    String expression = "(" + expressionSegment.text + ")";
 
     for (Segment segment in node.segments) {
       if (segment is InputSegment) {
