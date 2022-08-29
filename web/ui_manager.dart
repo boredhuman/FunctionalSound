@@ -394,7 +394,7 @@ class UIManager {
   }
 
   String resolveInputs(Node node, ExpressionSegment expressionSegment) {
-    String expression = "(" + expressionSegment.text + ")";
+    String expression = expressionSegment.text;
 
     for (Segment segment in node.segments) {
       if (segment is InputSegment) {
@@ -403,7 +403,7 @@ class UIManager {
        if (inputOfSegment != null) {
          ExpressionSegment? subExpressionSegment = getExpressionSegment(inputOfSegment);
          if (subExpressionSegment != null) {
-           expression = expression.replaceAll("i${segment.index}", resolveInputs(inputOfSegment, subExpressionSegment));
+           expression = expression.replaceAll("i${segment.index}", "(" + resolveInputs(inputOfSegment, subExpressionSegment) + ")");
          } else {
            if (inputOfSegment == timeNode) {
              expression = expression.replaceAll("i${segment.index}", "x");
