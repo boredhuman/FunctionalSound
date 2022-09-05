@@ -31,6 +31,9 @@ external Object vec4transformMat4(Object receivingVec4, Object vec4, Object mat4
 @JS("glMatrix.mat4.copy")
 external Object copy(Object receivingMat, Object srcMat);
 
+@JS("glMatrix.mat4.identity")
+external void mat4Identity(Object receivingMat);
+
 class Mat4 {
   Object matrix;
 
@@ -70,6 +73,10 @@ class Mat4 {
 
   void mul(Mat4 right) {
     mat4Mul(matrix, matrix, right);
+  }
+
+  void identity() {
+    mat4Identity(matrix);
   }
 
   Mat4 clone() {

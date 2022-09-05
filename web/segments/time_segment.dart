@@ -57,7 +57,7 @@ class TimeSegment extends Segment {
     int right = left + 30;
     int bottom = y + 5;
     int top = bottom + 30;
-    return uiManager.lastMouseX > left && uiManager.lastMouseX < right && uiManager.getMouseY() > bottom && uiManager.getMouseY() < top;
+    return uiManager.getMouseX() > left && uiManager.getMouseX() < right && uiManager.getMouseY() > bottom && uiManager.getMouseY() < top;
   }
 
   // play button is rendered as two right angled triangles
@@ -99,7 +99,7 @@ class TimeSegment extends Segment {
     int left = right - 24;
     int bottom = y + 5;
     int top = bottom + 30;
-    return uiManager.lastMouseX > left && uiManager.lastMouseX < right && uiManager.getMouseY() > bottom && uiManager.getMouseY() < top;
+    return uiManager.getMouseX() > left && uiManager.getMouseX() < right && uiManager.getMouseY() > bottom && uiManager.getMouseY() < top;
   }
 
   bool overButton() {
@@ -108,7 +108,7 @@ class TimeSegment extends Segment {
     int xOffset = width ~/ 2 - (wid + gap);
     int left = x + xOffset;
     int right = left + wid * 2 + gap * 2;
-    return inElement(uiManager.lastMouseX, uiManager.getMouseY()) && uiManager.lastMouseX > left && uiManager.lastMouseX < right;
+    return inElement(uiManager.getMouseX(), uiManager.getMouseY()) && uiManager.getMouseX() > left && uiManager.getMouseX() < right;
   }
 
   set setPlaying(bool playing) => this.playing = playing;

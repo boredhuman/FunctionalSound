@@ -25,13 +25,13 @@ class Node {
   Node(this.x, this.y, this.width, {this.renderOutput = true, this.renderInput = false});
 
   bool inHeader() {
-    int xPos = uiManager.lastMouseX;
+    int xPos = uiManager.getMouseX();
     int yPos = uiManager.getMouseY();
     return xPos > x && yPos > y + height - 7 && xPos < x + width && yPos < y + height;
   }
 
   bool isOverNode() {
-    int xPos = uiManager.lastMouseX;
+    int xPos = uiManager.getMouseX();
     int yPos = uiManager.getMouseY();
     bool overNode = xPos > x && yPos > y && xPos < x + width && yPos < y + height;
 
@@ -81,7 +81,7 @@ class Node {
 
   bool inRadius(int x, int y, int radius) {
     int mouseY = uiManager.getMouseY();
-    int xDif = (x - uiManager.lastMouseX).abs();
+    int xDif = (x - uiManager.getMouseX()).abs();
     int yDif = (y - mouseY).abs();
     // avoiding use sqrt
     int distanceSq = xDif * xDif + yDif * yDif;
@@ -157,7 +157,7 @@ class Node {
   bool handleMouseDown(MouseEvent event) {
     if (inHeader()) {
       dragging = true;
-      lastMouseX = uiManager.lastMouseX;
+      lastMouseX = uiManager.getMouseX();
       lastMouseY = uiManager.getMouseY();
       return true;
     }

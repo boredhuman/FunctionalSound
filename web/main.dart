@@ -15,6 +15,8 @@ BufferBuilder bufferBuilder = BufferBuilder();
 late UIManager uiManager;
 MatrixStack matrixStack = MatrixStack();
 AudioManager audioManager = AudioManager();
+double zoom = 1;
+double newZoom = zoom;
 
 void main() {
   fontRenderer = FontRenderer(fontTexture);
@@ -27,11 +29,16 @@ void renderLoop() {
   CanvasElement canvas = document.getElementById("canvas") as CanvasElement;
   MatrixStack.projectionMatrixStack.pushMatrix();
   MatrixStack.projectionMatrixStack.getMatrix().orthogonalMat(0, canvas.clientWidth, 0, canvas.clientHeight, -10, 10);
+  zoom = newZoom;
+  MatrixStack.modelViewMatrixStack.pushMatrix();
+  MatrixStack.modelViewMatrixStack.getMatrix().scale(1 / zoom, 1 / zoom, 1);
 
   gl.clear(WebGL.COLOR_BUFFER_BIT | WebGL.DEPTH_BUFFER_BIT);
 
   uiManager.render();
+
   MatrixStack.projectionMatrixStack.popMatrix();
+  MatrixStack.modelViewMatrixStack.popMatrix();
 
   int error;
 

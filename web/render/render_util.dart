@@ -106,7 +106,7 @@ drawQuadColor(int left, int top, int right, int bottom, int colorLeftBottom, int
     // mid point needs to be in view space so do this below to put it into view space
     List<double> transformedMidPoint = MatrixStack.modelViewMatrixStack.getMatrix().transform([midPointX.toDouble(), midPointY.toDouble(), 0, 1]);
     gl.uniform2f(shader.uniformLocations["midPoint"], transformedMidPoint[0], transformedMidPoint[1]);
-    gl.uniform2f(shader.uniformLocations["dimensions"], width ~/ 2, height ~/ 2);
+    gl.uniform2f(shader.uniformLocations["dimensions"], width ~/ (2 * zoom), height ~/ (2 * zoom));
   }
   gl.drawArrays(WebGL.TRIANGLE_STRIP, 0, 4);
 

@@ -36,7 +36,7 @@ class InputSegment extends LabelSegment {
   }
 
   bool inRadius(int x, int y, int radius) {
-    int xDif = x - uiManager.lastMouseX;
+    int xDif = x - uiManager.getMouseX();
     int yDif = y - uiManager.getMouseY();
     // avoiding use sqrt
     int distanceSq = xDif * xDif + yDif * yDif;

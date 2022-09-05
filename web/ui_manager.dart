@@ -1,7 +1,9 @@
 import 'dart:html';
+import 'dart:math';
 import 'dart:web_gl';
 
 import 'main.dart';
+import 'render/matrix_stack.dart';
 import 'render/render_util.dart';
 import 'segments/click_listener.dart';
 import 'segments/dynamic_listener.dart';
@@ -36,18 +38,19 @@ class UIManager {
   List<Node> consumedDown = [];
   List<Segment> overlay = [];
   bool showingOptions = false;
+  bool lastClickConsumed = false;
 
   UIManager(this.canvas) {
     consoleLog("initializing ui manager");
 
     canvas.onClick.listen((event) {
-      handleEvent(event);
+      lastClickConsumed = handleEvent(event);
     });
 
     canvas.onMouseDown.listen((event) {
       if (!overNodes() && !showingOptions) {
         print('dragging background');
-        lastDragX = lastMouseX;
+        lastDragX = getMouseX();
         lastDragY = getMouseY();
         draggingBackground = true;
         return;
@@ -81,8 +84,11 @@ class UIManager {
     });
 
     canvas.onDoubleClick.listen((event) {
+      if (lastClickConsumed) {
+        return;
+      }
       if (!overNodes()) {
-        Node newElement = Node(lastMouseX - 200, getMouseY(), 400, renderOutput: true);
+        Node newElement = Node(getMouseX() - 200, getMouseY(), 400, renderOutput: true);
         newElement.addSegment(LabelSegment("Unnamed", deletable: true));
         newElement.addSegment(AddSegment());
         newElement.y -= newElement.height;
@@ -183,7 +189,42 @@ class UIManager {
     }));
     overlay.add(labelSegment);
 
+    LabelSegment zoomIn = LabelSegment("Zoom In");
+    addRedHover(zoomIn);
+    int widthZi = fontRenderer!.getStringWidth("Zoom In");
+    zoomIn.setDimensions(x: canvas.width! - widthZi - 10, y: canvas.height! - 80, width: widthZi, height: 40);
+    zoomIn.addListener(ClickListener<LabelSegment>((seg) {
+      translate(1);
+    }));
+    overlay.add(zoomIn);
+
+    LabelSegment zoomOut = LabelSegment("Zoom Out");
+    addRedHover(zoomOut);
+    int widthZo = fontRenderer!.getStringWidth("Zoom Out");
+    zoomOut.setDimensions(x: canvas.width! - widthZo - 10, y: canvas.height! - 120, width: widthZo, height: 40);
+    zoomOut.addListener(ClickListener<LabelSegment>((seg) {
+      translate(-1);
+    }));
+    overlay.add(zoomOut);
+
     showingOptions = false;
+  }
+
+  void translate(double dir) {
+    double oldZoom = newZoom;
+    newZoom = min(2, max(1, newZoom + 0.1 * dir));
+    double delta = newZoom - oldZoom;
+    // move all elements so it appears their mid point has not changed
+    if (delta != 0) {
+      for (Node element in elements) {
+        double scale = 0.5 * newZoom - 0.5;
+        double oldScale = 0.5 * oldZoom - 0.5;
+        element.x -= (canvas.clientWidth * oldScale).toInt();
+        element.x += (canvas.clientWidth * scale).toInt();
+        element.y -= (canvas.clientHeight * oldScale).toInt();
+        element.y += (canvas.clientHeight * scale).toInt();
+      }
+    }
   }
 
   void showOptions() {
@@ -253,7 +294,7 @@ class UIManager {
     print("adding debug");
     LabelSegment mouseX = LabelSegment("");
     mouseX.addListener(RenderListener<LabelSegment>((seg) {
-      seg.text = lastMouseX.toString();
+      seg.text = getMouseX().toString();
       seg.width = fontRenderer!.getStringWidth(seg.text);
     }));
     mouseX.setDimensions(x: 0, y: 0, width: 0, height: 40);
@@ -276,50 +317,64 @@ class UIManager {
     // if dragging background
     if (!showingOptions) {
       if (draggingBackground) {
-        int deltaX = lastDragX - lastMouseX;
+        int deltaX = lastDragX - getMouseX();
         int deltaY = lastDragY - getMouseY();
         for (Node element in elements) {
           element.x -= deltaX;
           element.y -= deltaY;
         }
 
-        lastDragX = lastMouseX;
-        lastDragY = uiManager.getMouseY();
+        lastDragX = getMouseX();
+        lastDragY = getMouseY();
       }
 
       for (Node element in elements) {
-        element.render(lastMouseX, uiManager.getMouseY());
+        element.render(getMouseX(), getMouseY());
       }
     }
     // debug quad to see mouse pixel x and y
-    drawQuad(lastMouseX, getMouseY() + 1, lastMouseX + 1, getMouseY(), 0xFF0000FF);
+    drawQuad(getMouseX(), getMouseY() + 1, getMouseX() + 1, getMouseY(), 0xFF0000FF);
+
+    // keep overlay operating at no zoom
+    MatrixStack.modelViewMatrixStack.getMatrix().scale(zoom, zoom, 1);
+    double oldZoom = zoom;
+    zoom = 1;
 
     for (Segment segment in overlay) {
       segment.render();
     }
+
+    zoom = oldZoom;
+    MatrixStack.modelViewMatrixStack.getMatrix().scale(1 / zoom, 1 / zoom, 1);
   }
 
-  void handleEvent(Event event) {
+  // returns true if event was consumed
+  bool handleEvent(Event event) {
     if (!showingOptions) {
       if (event is MouseEvent) {
         if (handleMouseEvent(event)) {
-          print("Returning");
-          return;
+          return true;
         }
       }
       for (Node element in elements) {
         if (element.handleEvent(event)) {
-          print("node consumed click");
-          return;
+          return true;
         }
       }
     }
 
+    // keep overlay operating at no zoom
+    double oldZoom = zoom;
+    zoom = 1;
     for (Segment segment in overlay) {
       if (segment.handleEventInternal(event)) {
-        return;
+        zoom = oldZoom;
+        return true;
       }
     }
+    zoom = oldZoom;
+
+    return false;
   }
 
   bool overNodes() {
@@ -427,6 +482,10 @@ class UIManager {
 
   // inverts mouse y so bottom left is the reference
   int getMouseY() {
-    return canvas.clientHeight - lastMouseY;
+    return ((canvas.clientHeight - lastMouseY) * zoom).toInt();
+  }
+
+  int getMouseX() {
+    return (lastMouseX * zoom).toInt();
   }
 }

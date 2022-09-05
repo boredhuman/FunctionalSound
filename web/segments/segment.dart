@@ -65,7 +65,7 @@ abstract class Segment {
   }
 
   bool isOver() {
-    return uiManager.lastMouseX > x && uiManager.lastMouseX < x + width && uiManager.getMouseY() > y && uiManager.getMouseY() < y + height;
+    return uiManager.getMouseX() > x && uiManager.getMouseX() < x + width && uiManager.getMouseY() > y && uiManager.getMouseY() < y + height;
   }
 
   Map toMap();

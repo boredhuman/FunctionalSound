@@ -7,7 +7,7 @@ import '../main.dart';
 external void consoleLog(Object? object);
 
 bool overCross(int x, int y, int width) {
-  int mouseX = uiManager.lastMouseX;
+  int mouseX = uiManager.getMouseX();
   int mouseY = uiManager.getMouseY();
   int half = width ~/ 2;
   return mouseX > x - half && mouseY > y - half && mouseX < x + half && mouseY < y + half;

@@ -63,7 +63,9 @@ class LabelSegment extends Segment {
     super.render();
     // hide overflow
     gl.enable(WebGL.SCISSOR_TEST);
-    gl.scissor(x, y, width, height);
+    List<double> pos1 = MatrixStack.modelViewMatrixStack.getMatrix().transform([x.toDouble(), y.toDouble(), 0, 1]);
+    List<double> pos2 = MatrixStack.modelViewMatrixStack.getMatrix().transform([x + width.toDouble(), y + height.toDouble(), 0, 1]);
+    gl.scissor(pos1[0].toInt(), pos1[1].toInt(), (pos2[0] - pos1[0]).toInt(), (pos2[1] - pos1[1]).toInt());
 
     int bottomPad = (height - 32) ~/ 2;
     int renderY = y + bottomPad;
