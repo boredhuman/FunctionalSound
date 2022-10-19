@@ -1,15 +1,54 @@
-@import url(https://fonts.googleapis.com/css?family=Roboto);
-
-html, body {
-  width: 100%;
-  height: 100%;
+body {
   margin: 0;
-  padding: 0;
-  font-family: 'Roboto', sans-serif;
+  background-color: #000000ff;
+  width: 100vh;
+  height: 100vh;
   overflow: hidden;
 }
 
-#output {
-  padding: 20px;
-  text-align: center;
+.node {
+  background-color: #333333ff;
+  border-radius: 6px;
+  position: absolute;
+}
+
+.header {
+  min-height: 10px;
+  background-color: #ffffffff;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+input {
+  background-color: #333333ff;
+  outline: none;
+  border-width: 0;
+  padding: 0;
+  appearance: none;
+}
+
+.row {
+  min-height: 40px;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+}
+
+.joint {
+  min-width: 20px;
+  min-height: 20px;
+  border-radius: 10px;
+  background-color: white;
+}
+
+.joint:hover {
+  background-color: red;
+}
+
+.text {
+  font-size: 20px;
+  color: white;
+  margin: 0;
 }
