@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:svg';
 import 'elements/delete.dart';
 import 'elements/expression_node.dart';
+import 'elements/settings.dart';
 import 'line_renderer.dart';
 import 'elements/output_node.dart';
 import 'sound/audio_manager.dart';
@@ -17,13 +18,66 @@ void main() {
 
   var outputNode = OutputNode.create(800, 440);
 
-  document.body?.children.addAll([lineRenderer.background, timeNode, outputNode, ExpressionNode.create(400, 400)]);
+  var settings = Settings.createSettings();
 
+  var elementContainer = DivElement()
+    ..id = "nodeBox"
+    ..children.addAll([timeNode, outputNode, ExpressionNode.create(400, 400)]);
+
+  document.body?.children.addAll([lineRenderer.background, elementContainer, settings]);
+
+  addDragAllFunction();
+  addFunctions();
+}
+
+addFunctions() {
   addDragFunctions();
   addJointFunctions();
   addInputFunctions();
   addPausePlayFunctions();
   addDeleteFunctions(document.getElementsByClassName("delete-icon"));
+}
+
+void addDragAllFunction() {
+  int prevX = 0;
+  int prevY = 0;
+  bool dragging = false;
+
+  document.body!.onMouseDown.listen((event) {
+    if (event.target == document.body || event.target == lineRenderer.background) {
+      consoleLog("dragging body");
+      prevX = event.client.x.toInt();
+      prevY = event.client.y.toInt();
+      dragging = true;
+    }
+  });
+
+  document.body!.onMouseUp.listen((event) {
+    dragging = false;
+  });
+
+  document.body!.onMouseMove.listen((event) {
+    if (dragging) {
+      int deltaX = event.client.x.toInt() - prevX;
+      int deltaY = event.client.y.toInt() - prevY;
+      if (deltaX != 0 || deltaY != 0) {
+        prevX = event.client.x.toInt();
+        prevY = event.client.y.toInt();
+
+        Element nodeBox = document.getElementById("nodeBox")!;
+
+        for (Element node in nodeBox.children) {
+          String left = node.style.getPropertyValue("left");
+          String top = node.style.getPropertyValue("top");
+          int leftNumber = int.parse(left.substring(0, left.length - 2));
+          int topNumber = int.parse(top.substring(0, top.length - 2));
+
+          node.style.setProperty("left", "${leftNumber + deltaX}px");
+          node.style.setProperty("top", "${topNumber + deltaY}px");
+        }
+      }
+    }
+  });
 }
 
 void addDeleteFunctions(List<Node> nodes) {
@@ -189,11 +243,12 @@ void addPausePlayFunctions() {
     if (playing) {
       pausePlay.children.addAll([
         PolygonElement()
-        ..setAttribute("points", "0,0 0,20 8,20 8,0")
-        ..style.setProperty("fill", "white"),
+          ..setAttribute("points", "0,0 0,20 8,20 8,0")
+          ..style.setProperty("fill", "white"),
         PolygonElement()
-        ..setAttribute("points", "12,0 12,20 20,20 20,0")
-        ..style.setProperty("fill", "white")]);
+          ..setAttribute("points", "12,0 12,20 20,20 20,0")
+          ..style.setProperty("fill", "white")
+      ]);
 
       String expression = getExpression();
       if (expression.isNotEmpty) {
@@ -274,7 +329,6 @@ void addJointFunctions() {
           var firstClickedInput = lastClicked!.classes.contains("input-joint");
           var currentClickedInput = target.classes.contains("input-joint");
           if (firstClickedInput != currentClickedInput) {
-
             if (firstClickedInput) {
               var parentNode = getParentWithClass(target, "node");
               lastClicked!.setAttribute("src-node", "${parentNode?.id}");

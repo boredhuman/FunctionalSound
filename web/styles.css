@@ -52,3 +52,30 @@ input {
   color: white;
   margin: 0;
 }
+
+.button:active {
+  user-select: none;
+  background-color: #333 !important;
+}
+
+.button:hover {
+  outline: #444 solid 2px;
+}
+
+@keyframes slideout {
+  from {
+    transform: translate(-450px, 0);
+  }
+  to {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes slidein {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(-450px, 0);
+  }
+}
