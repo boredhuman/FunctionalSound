@@ -53,6 +53,10 @@ input {
   margin: 0;
 }
 
+.centerText {
+  text-align: center;
+}
+
 .button:active {
   user-select: none;
   background-color: #333 !important;
